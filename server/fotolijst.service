@@ -1,0 +1,16 @@
+# Voorbeeld systemd-service. Pas User en paden aan, en kopieer naar
+# /etc/systemd/system/fotolijst.service
+[Unit]
+Description=Fotolijst-server (Immich -> e-paper)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/fotolijst
+ExecStart=/home/pi/fotolijst/venv/bin/python fotolijst_server.py
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

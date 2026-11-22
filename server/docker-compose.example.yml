@@ -1,0 +1,19 @@
+# Kopieer naar docker-compose.yml en zet de geheimen in .env (niet in dit bestand).
+services:
+  fotolijst:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      IMMICH_URL: ${IMMICH_URL}
+      IMMICH_API_KEY: ${IMMICH_API_KEY}
+      IMMICH_ALBUM: ${IMMICH_ALBUM:-Fotolijst}
+      REFRESH_SECONDS: ${REFRESH_SECONDS:-3600}
+      FRAME_TOKEN: ${FRAME_TOKEN:-}
+      ORIENTATION: ${ORIENTATION:-auto}
+      ROTATION: ${ROTATION:-90}
+      SATURATION: ${SATURATION:-1.5}
+      CONTRAST: ${CONTRAST:-1.2}
+      BRIGHTNESS: ${BRIGHTNESS:-1.0}
+      WARMTH: ${WARMTH:-0.0}
