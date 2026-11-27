@@ -5,20 +5,58 @@ Build and flash instructions are in the [main README](../README.md).
 
 ## How the pieces fit together
 
+```mermaid
+flowchart LR
+    usb[["USB drive<br/>FOTOLIJST"]] --> configdisk
+    main[main.cpp] --> configdisk --> settings
+    main --> photos -- HTTPS --> immich[(Immich)]
+    photos --> imaging
+    main --> epd[epd5in65f] -- SPI --> panel[[e-paper panel]]
+    log[log] -.- main
 ```
-main.cpp ──▶ configdisk ──▶ settings          config.txt on the USB drive → Settings
-   │
-   ├──────▶ photos ──▶ (HTTPS to Immich)      pick a photo, download the preview JPEG
-   │           └─────▶ imaging               decode, rotate, crop, colour, dither → frame
-   │
-   └──────▶ epd5in65f                         send the frame to the panel and refresh
 
- log  ← used by all of the above
-```
+`log` is used by all modules.
 
 Every `REFRESH_SECONDS` (or right after `config.txt` changes, or on the `NOW` command)
 `main.cpp` connects to WiFi, asks `photos` for a new 134,400-byte frame and hands it to
 `epd5in65f`. If something fails, the current photo stays up and it retries in 5 minutes.
+
+## Main loop
+
+```mermaid
+flowchart TD
+    A([Power on]) --> B["Load config.txt from flash<br/>(create a default one on first boot)"]
+    B --> C[Start USB drive and serial ports]
+    C --> L{Serial command?}
+    L -- "IMG test image" --> T[Show test image] --> P[Pause automatic updates for 10 min] --> W
+    L -- NOW --> F
+    L -- no --> M{config.txt changed?}
+    M -- yes --> R[Apply settings, reconnect WiFi] --> F
+    M -- no --> Q{Time for a new photo?}
+    Q -- no --> W[Wait 10 ms] --> L
+    Q -- yes --> F
+
+    F[Connect to WiFi] --> G[Find album by name]
+    G --> H["Get 40 random candidates<br/>(/api/search/random)"]
+    H --> I[Sort: not shown recently and matching orientation first]
+    I --> J[Download preview JPEG]
+    J --> K{Usable?}
+    K -- "wrong orientation<br/>(max. 6 downloads)" --> J
+    K -- yes --> D["Decode at 1/2 or 1/4 scale,<br/>rotate if needed"]
+    D --> E[Crop, resize, colour, dither]
+    E --> S["Refresh panel (~12 s)"]
+    S --> N[Next photo after REFRESH_SECONDS] --> W
+
+    F -- no WiFi --> X
+    G -- not found --> X
+    K -- "WebP or broken" --> X
+    X[Keep current photo, retry in 5 min] --> W
+
+    classDef err fill:#fde2e1,stroke:#c0392b,color:#000
+    classDef ok fill:#e3f1e6,stroke:#2e7d32,color:#000
+    class X err
+    class S ok
+```
 
 ## Files
 

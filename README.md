@@ -11,10 +11,14 @@ the ESP32 downloads, crops, colour-corrects and dithers the photo itself.
 
 ## How it works
 
-```
- Immich album ──HTTPS + API key──▶ ESP32-S3 ──SPI──▶ e-paper
-                                   (download preview JPEG, decode, crop/rotate,
-                                    colour-correct, dither to 7 colours, refresh)
+```mermaid
+flowchart LR
+    immich[(Immich album)] -- "HTTPS + API key" --> esp
+    subgraph esp [ESP32-S3]
+        direction TB
+        d1[Download preview JPEG] --> d2[Decode and rotate] --> d3[Crop and resize] --> d4[Colour and dither to 7 colours]
+    end
+    esp -- SPI --> panel[[e-paper 600x448]]
 ```
 
 1. The ESP32 picks a random photo from an Immich album (`/api/search/random`, skipping
