@@ -73,7 +73,8 @@ In normal use only the native **USB** port needs a cable.
 
 ## 2. Firmware
 
-Built with [PlatformIO](https://platformio.org) on Arduino-ESP32 3.x.
+Built with [PlatformIO](https://platformio.org) on Arduino-ESP32 3.x. See
+[`firmware/README.md`](firmware/README.md) for what each source file does.
 
 ```sh
 cd firmware
