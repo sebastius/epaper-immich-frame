@@ -1,24 +1,28 @@
 #include "epd5in65f.h"
 
+#include "log.h"
+
 namespace epd {
+
+#define EPD_SPI SPI
 
 static SPISettings spiSettings(4000000, MSBFIRST, SPI_MODE0);
 
 static void cmd(uint8_t c) {
   digitalWrite(PIN_DC, LOW);
   digitalWrite(PIN_CS, LOW);
-  SPI1.beginTransaction(spiSettings);
-  SPI1.transfer(c);
-  SPI1.endTransaction();
+  EPD_SPI.beginTransaction(spiSettings);
+  EPD_SPI.transfer(c);
+  EPD_SPI.endTransaction();
   digitalWrite(PIN_CS, HIGH);
 }
 
 static void data(uint8_t d) {
   digitalWrite(PIN_DC, HIGH);
   digitalWrite(PIN_CS, LOW);
-  SPI1.beginTransaction(spiSettings);
-  SPI1.transfer(d);
-  SPI1.endTransaction();
+  EPD_SPI.beginTransaction(spiSettings);
+  EPD_SPI.transfer(d);
+  EPD_SPI.endTransaction();
   digitalWrite(PIN_CS, HIGH);
 }
 
@@ -32,12 +36,12 @@ static bool waitLevel(int level, uint32_t timeoutMs, const char *what) {
   uint32_t t0 = millis();
   while (digitalRead(PIN_BUSY) != level) {
     if (millis() - t0 > timeoutMs) {
-      Serial.printf("  busy-timeout bij %s (na %lu ms)\n", what, (unsigned long)(millis() - t0));
+      logf("  busy-timeout bij %s (na %lu ms)\n", what, (unsigned long)(millis() - t0));
       return false;
     }
     delay(1);
   }
-  Serial.printf("  %s: %lu ms\n", what, (unsigned long)(millis() - t0));
+  logf("  %s: %lu ms\n", what, (unsigned long)(millis() - t0));
   return true;
 }
 
@@ -47,9 +51,7 @@ void begin() {
   pinMode(PIN_CS, OUTPUT);
   pinMode(PIN_BUSY, INPUT);
   digitalWrite(PIN_CS, HIGH);
-  SPI1.setSCK(PIN_CLK);
-  SPI1.setTX(PIN_DIN);
-  SPI1.begin();
+  EPD_SPI.begin(PIN_CLK, -1, PIN_DIN, -1);   // CS sturen we zelf
 }
 
 static void reset() {
@@ -82,12 +84,12 @@ bool show(RowFn fill) {
   cmd(0x10);
   digitalWrite(PIN_DC, HIGH);
   digitalWrite(PIN_CS, LOW);
-  SPI1.beginTransaction(spiSettings);
+  EPD_SPI.beginTransaction(spiSettings);
   for (int y = 0; y < HEIGHT; y++) {
     fill(y, row);
-    SPI1.transfer(row, sizeof(row));
+    EPD_SPI.transfer(row, sizeof(row));
   }
-  SPI1.endTransaction();
+  EPD_SPI.endTransaction();
   digitalWrite(PIN_CS, HIGH);
   return refreshAgain();
 }

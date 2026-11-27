@@ -11,3 +11,4 @@ __pycache__/
 # lokaal
 *.jpeg
 *.jpg
+firmware/test/host/imaging_test

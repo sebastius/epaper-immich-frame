@@ -16,6 +16,8 @@ from epaper import FRAME_BYTES, H, W, convert, pack  # noqa: E402
 def send(port, data, temp_offset=0, pll=0x3C, passes=1, external_sensor=False, cdi=0x37):
     import serial
 
+    # Gebruik de native USB-poort van de fotolijst. Openen van de COM-poort (USB-serieel
+    # chip) reset het bordje, en die poort is te traag voor een heel beeld.
     with serial.Serial(port, 115200, timeout=1) as s:
         s.reset_input_buffer()
         tse = (0x80 if external_sensor else 0) | (temp_offset & 0x0F)
@@ -28,12 +30,12 @@ def send(port, data, temp_offset=0, pll=0x3C, passes=1, external_sensor=False, c
         while time.time() - t < 120 * passes + 60:
             line = s.readline().decode(errors="replace").strip()
             if line:
-                print("  pico:", line)
+                print("  lijst:", line)
             if line.startswith("OK ontvangen") or line.startswith("ERR timeout"):
                 received = True
             if received and line.startswith(("DONE", "ERR")):
                 return line.startswith("DONE")
-    print("  geen antwoord van de pico")
+    print("  geen antwoord van de fotolijst")
     return False
 
 

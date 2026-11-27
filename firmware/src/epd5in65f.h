@@ -1,4 +1,4 @@
-// Driver voor Waveshare 5.65" 7-kleuren ACeP (600x448), Arduino-pico core.
+// Driver voor Waveshare 5.65" 7-kleuren ACeP (600x448), ESP32-S3 (Arduino).
 // Commando-reeks gelijk aan de officiële Waveshare-driver (EPD_5in65f.c).
 #pragma once
 #include <Arduino.h>
@@ -11,12 +11,13 @@ constexpr int HEIGHT = 448;
 
 enum Color : uint8_t { BLACK = 0, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE, CLEAN };
 
-constexpr int PIN_DC = 8;
-constexpr int PIN_CS = 9;
-constexpr int PIN_CLK = 10;
+// ESP32-S3 (N16R8): FSPI-pinnen voor DIN/CLK/CS
 constexpr int PIN_DIN = 11;
-constexpr int PIN_RST = 12;
-constexpr int PIN_BUSY = 13;
+constexpr int PIN_CLK = 12;
+constexpr int PIN_CS = 10;
+constexpr int PIN_DC = 9;
+constexpr int PIN_RST = 8;
+constexpr int PIN_BUSY = 7;
 
 // Rij-callback: vul `row` (WIDTH/2 bytes, 2 pixels per byte, hoge nibble eerst) voor rij y.
 using RowFn = void (*)(int y, uint8_t *row);
