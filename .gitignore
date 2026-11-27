@@ -1,7 +1,5 @@
 # geheimen
 firmware/src/secrets.h
-server/.env
-server/docker-compose.yml
 
 # build / cache
 firmware/.pio/

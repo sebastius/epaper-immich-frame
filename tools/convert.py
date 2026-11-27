@@ -5,12 +5,10 @@ Gebruik:
   convert.py foto.jpg [--preview uit.png] [--send /dev/ttyACM0]
 """
 import argparse
-import os
 import sys
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "server"))
-from epaper import FRAME_BYTES, H, W, convert, pack  # noqa: E402
+from epaper import FRAME_BYTES, H, W, convert, pack
 
 
 def send(port, data, temp_offset=0, pll=0x3C, passes=1, external_sensor=False, cdi=0x37):

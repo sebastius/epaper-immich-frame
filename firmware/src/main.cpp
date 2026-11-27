@@ -1,7 +1,6 @@
 // Fotolijst-firmware voor ESP32-S3 + Waveshare 5.65" 7-kleuren e-paper.
 //
-// - Haalt periodiek een foto op: rechtstreeks uit Immich (en zet die zelf om) of als
-//   kant-en-klaar frame van de fotolijst-server. Zie config.txt.
+// - Haalt periodiek een foto uit een Immich-album en zet die zelf om. Zie config.txt.
 // - De native USB-poort biedt een schijfje met config.txt aan; wijzigingen worden na een
 //   paar seconden overgenomen.
 // - Seriële commando's (COM-poort of native USB, 115200 baud):
@@ -81,11 +80,10 @@ static uint32_t update() {
 
 static void applySettings(const String &text) {
   settings = parseSettings(text);
-  String mode = settings.immichMode() ? "Immich (" + settings.immichAlbum + ")"
-              : settings.serverMode() ? "server" : "niet ingesteld";
-  logf("instellingen: WiFi '%s', bron %s, elke %lu s, stand %s/%d\n", settings.wifiSsid.c_str(),
-       mode.c_str(), (unsigned long)settings.refreshSeconds, settings.orientation.c_str(),
-       settings.rotation);
+  logf("instellingen: WiFi '%s', album '%s'%s, elke %lu s, stand %s/%d\n",
+       settings.wifiSsid.c_str(), settings.immichAlbum.c_str(),
+       settings.immichUrl.isEmpty() ? " (geen IMMICH_URL)" : "",
+       (unsigned long)settings.refreshSeconds, settings.orientation.c_str(), settings.rotation);
 }
 
 // ------------------------------------------------------------ serieel

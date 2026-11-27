@@ -21,7 +21,7 @@ static void *bigAlloc(size_t n) { return malloc(n); }
 
 namespace img {
 
-// Gemeten paneelkleuren (zelfde als server/epaper.py), index = kleurcode van het scherm.
+// Gemeten paneelkleuren (zelfde als tools/epaper.py), index = kleurcode van het scherm.
 static const uint8_t PANEL[7][3] = {
     {24, 25, 65},     // zwart (blauwig)
     {235, 235, 235},  // wit

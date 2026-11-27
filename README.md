@@ -5,9 +5,7 @@ e-paper display** (600×448) shows a random photo from an album in your own
 [Immich](https://immich.app) server, every hour or once a day. No extra server needed:
 the ESP32 downloads, crops, colour-corrects and dithers the photo itself.
 
-![3D-printable case: front, back and side view](case/preview.png)
-
-> **Written by AI.** All code, the case design and this documentation were written by an
+> **Written by AI.** All code and this documentation were written by an
 > AI coding assistant, directed and tested on real hardware by a human. It works on the
 > author's frame; review before you rely on it.
 
@@ -32,18 +30,12 @@ the ESP32 downloads, crops, colour-corrects and dithers the photo itself.
 Decoding and converting take about 5–7 s on the ESP32-S3; a whole update including WiFi
 and HTTPS takes ~20 s. Certificates are verified with the built-in CA bundle.
 
-**Optional server mode.** [`server/`](server/) contains a small Python service that does
-the same conversion on a home server and hands out ready-made frames. Useful if you'd
-rather not store the Immich API key on the device, or want a `/preview.png` to tune
-the image settings in a browser.
-
 ## Hardware
 
 | Part | Notes |
 |---|---|
 | ESP32-S3 dev board, **N16R8** | 16 MB flash, 8 MB octal PSRAM; e.g. an ESP32-S3-DevKitC-1 clone with two USB-C ports |
 | Waveshare 5.65inch e-Paper Module (F) | 600×448, black/white/green/blue/red/yellow/orange |
-| 3D-printed case | optional, see [below](#3d-printed-case) |
 
 ### Wiring
 
@@ -100,8 +92,7 @@ stores the settings in flash, applies them and fetches a new photo. No need to e
 | `IMMICH_URL` | | e.g. `https://photos.example.net` |
 | `IMMICH_API_KEY` | | |
 | `IMMICH_ALBUM` | `Fotolijst` | album name or id (shared albums work too) |
-| `FRAME_URL` | | server mode instead of Immich, e.g. `http://192.168.1.10:8080/frame?token=…`; only used when `IMMICH_URL` is empty |
-| `REFRESH_SECONDS` | `3600` | `86400` = daily (in server mode the server decides) |
+| `REFRESH_SECONDS` | `3600` | `86400` = daily |
 | `ORIENTATION` | `auto` | `landscape`: landscape photos only · `portrait`: portrait photos only, rotated for a frame standing upright · `auto`: everything, portrait photos rotated |
 | `ROTATION` | `90` | `90` or `270`; flip it if photos come out upside down |
 | `SATURATION` / `CONTRAST` / `BRIGHTNESS` | `1.5` / `1.2` / `1.0` | `1.0` = unchanged |
@@ -114,58 +105,6 @@ cable doesn't lose your edits once the frame has stored them.
 
 On either port (115200 baud): `NOW` fetches a new photo immediately.
 The log never prints the WiFi password or API key.
-
-## 3. Server (optional)
-
-Only needed for server mode. Runs anywhere on your LAN that is always on.
-
-**Docker**
-```sh
-cd server
-cp .env.example .env            # fill in IMMICH_URL, IMMICH_API_KEY, FRAME_TOKEN
-cp docker-compose.example.yml docker-compose.yml
-docker compose up -d --build
-```
-
-**Plain Python** (3.10+, only dependency is Pillow)
-```sh
-cd server
-python3 -m venv venv && venv/bin/pip install -r requirements.txt
-cp .env.example .env            # the server reads .env next to the script
-venv/bin/python fotolijst_server.py
-```
-A systemd unit is included: [`server/fotolijst.service`](server/fotolijst.service).
-Check it with `http://<server>:8080/frame?token=<token>`, then
-`http://<server>:8080/preview.png` shows how that photo will look on the panel.
-
-The server's `.env` takes the same image settings as `config.txt` (`REFRESH_SECONDS`,
-`ORIENTATION`, `ROTATION`, `SATURATION`, `CONTRAST`, `BRIGHTNESS`, `WARMTH`), plus
-`FRAME_TOKEN` (if set, `/frame` requires `?token=…`), `PHOTO_DIR` (serve a local folder,
-for testing) and `PORT` (`8080`).
-
-## 3D-printed case
-
-Portrait, leaning back 15°. Parametric FreeCAD script: [`case/fotolijst_case.py`](case/fotolijst_case.py),
-ready-made STLs in [`case/stl/`](case/stl).
-
-| Part | Print orientation | |
-|---|---|---|
-| `front.stl` | front face down | bezel with chamfered window, walls, foot |
-| `back.stl` | outside face down | lid with pads that hold the display |
-| `stand.stl` | base plate down | two fins, screws onto the lid |
-
-No supports needed. Screws (self-tapping): 4× M2.5×10 lid, 2× M2.5×8 stand.
-
-> **Not yet adapted to the ESP32-S3.** The lid still has posts and a USB opening for a
-> Raspberry Pi Pico W (the first version of this project). An ESP32-S3 dev board is
-> larger (~26 × 63 mm) and has its USB-C ports elsewhere.
->
-> **Measure before printing.** Window position, module thickness and the display's
-> mounting depth come from Waveshare's specs and a photo, not from calipers. Check the
-> parameters at the top of the script and regenerate:
-> ```sh
-> freecad.cmd -c "exec(open('case/fotolijst_case.py').read())"
-> ```
 
 ## Tools
 
@@ -180,11 +119,11 @@ python3 tools/calibrate.py show --send $PORT           # colour patches for cali
 ```
 
 `firmware/test/host/` builds the ESP32 image pipeline on a PC
-(`test/host/build.sh`, after `pio pkg install`) to compare it with the Python version.
+(`test/host/build.sh`, after `pio pkg install`) to compare it with the Python version in `tools/epaper.py`.
 
 ## Notes and lessons learned
 
-- **Colours.** The palette in [`server/epaper.py`](server/epaper.py) and
+- **Colours.** The palette in [`tools/epaper.py`](tools/epaper.py) and
   [`firmware/src/imaging.cpp`](firmware/src/imaging.cpp) was measured from a phone
   photo of the calibration patches, white-balanced on the panel white. Black on this
   panel is a slightly bluish dark grey; contrast is about 12:1.
@@ -198,8 +137,8 @@ python3 tools/calibrate.py show --send $PORT           # colour patches for cali
   ESP32-S3 SIMD) the decoder's RGB8888 output is R,G,B or B,G,R. The firmware decodes a
   tiny red JPEG at each scale once to find out.
 - **History.** The first version ran on a Raspberry Pi Pico W, which is too small to
-  decode photos and needed the server. MicroPython (Waveshare's own driver) hung on BUSY
-  on that board; C++ worked.
+  decode photos and needed a separate conversion server. MicroPython (Waveshare's own
+  driver) hung on BUSY on that board; C++ worked.
 
 Code comments and log messages are in Dutch.
 

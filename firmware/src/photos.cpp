@@ -46,7 +46,7 @@ class Buffer : public Stream {
 
 struct Response {
   int code = 0;
-  String contentType, sleepHeader;
+  String contentType;
   Buffer body;
 };
 
@@ -63,14 +63,13 @@ static bool request(const String &url, const char *method, const String &apiKey,
     r.code = -1;
     return false;
   }
-  const char *keys[] = {"Content-Type", "X-Sleep-Seconds"};
-  http.collectHeaders(keys, 2);
+  const char *keys[] = {"Content-Type"};
+  http.collectHeaders(keys, 1);
   if (apiKey.length()) http.addHeader("x-api-key", apiKey);
   if (jsonBody.length()) http.addHeader("Content-Type", "application/json");
   r.code = strcmp(method, "POST") == 0 ? http.POST(jsonBody) : http.GET();
   if (r.code > 0) {
     r.contentType = http.header("Content-Type");
-    r.sleepHeader = http.header("X-Sleep-Seconds");
     if (r.code == 200) http.writeToStream(&r.body);
   }
   http.end();
@@ -80,26 +79,6 @@ static bool request(const String &url, const char *method, const String &apiKey,
 static String httpError(const Response &r) {
   if (r.code > 0) return "HTTP " + String(r.code);
   return HTTPClient::errorToString(r.code);
-}
-
-// ------------------------------------------------------------ server-modus
-
-static Result fromServer(const Settings &s, uint8_t *frame) {
-  Result res;
-  Response r;
-  if (!request(s.frameUrl, "GET", "", "", r)) {
-    res.message = "server: " + httpError(r);
-  } else if (r.body.len != img::FRAME_BYTES) {
-    res.message = "server: " + String(r.body.len) + " bytes in plaats van " + String(img::FRAME_BYTES);
-  } else {
-    memcpy(frame, r.body.data, img::FRAME_BYTES);
-    res.ok = true;
-    res.message = "frame van de server";
-  }
-  long sl = r.sleepHeader.toInt();
-  if (sl >= 60) res.sleepSeconds = sl;
-  if (!res.ok) res.sleepSeconds = 300;
-  return res;
 }
 
 // ------------------------------------------------------------ Immich
@@ -288,12 +267,9 @@ static Result fromImmich(const Settings &s, uint8_t *frame) {
 // ------------------------------------------------------------ publiek
 
 Result fetchFrame(const Settings &s, uint8_t *frame) {
-  if (s.immichMode()) {
-    if (s.immichKey.isEmpty()) return {false, 300, "IMMICH_API_KEY ontbreekt in config.txt"};
-    return fromImmich(s, frame);
-  }
-  if (s.serverMode()) return fromServer(s, frame);
-  return {false, 300, "geen IMMICH_URL of FRAME_URL in config.txt"};
+  if (s.immichUrl.isEmpty()) return {false, 300, "geen IMMICH_URL in config.txt"};
+  if (s.immichKey.isEmpty()) return {false, 300, "geen IMMICH_API_KEY in config.txt"};
+  return fromImmich(s, frame);
 }
 
 }  // namespace photos

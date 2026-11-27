@@ -1,5 +1,4 @@
-// Foto's ophalen: rechtstreeks uit Immich (zelf omzetten) of als kant-en-klaar frame
-// van de fotolijst-server.
+// Foto's ophalen uit Immich en omzetten naar een frame voor het scherm.
 #pragma once
 #include <Arduino.h>
 

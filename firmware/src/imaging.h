@@ -1,6 +1,6 @@
 // Beeldverwerking: JPEG -> 600x448, 7 paneelkleuren, 4 bit per pixel.
 // Platformonafhankelijk (ook op de pc te bouwen voor tests); doet hetzelfde als
-// server/epaper.py.
+// tools/epaper.py.
 #pragma once
 #include <stddef.h>
 #include <stdint.h>

@@ -25,7 +25,6 @@ Settings parseSettings(const String &text) {
     else if (k == "IMMICH_URL") { s.immichUrl = v; while (s.immichUrl.endsWith("/")) s.immichUrl.remove(s.immichUrl.length() - 1); }
     else if (k == "IMMICH_API_KEY") s.immichKey = v;
     else if (k == "IMMICH_ALBUM") { if (v.length()) s.immichAlbum = v; }
-    else if (k == "FRAME_URL") s.frameUrl = v;
     else if (k == "REFRESH_SECONDS") { long n = v.toInt(); if (n >= 60) s.refreshSeconds = n; }
     else if (k == "ORIENTATION") { v.toLowerCase(); if (v == "landscape" || v == "portrait" || v == "auto") s.orientation = v; }
     else if (k == "ROTATION") { int n = v.toInt(); if (n == 90 || n == 270) s.rotation = n; }
@@ -46,17 +45,13 @@ const char *defaultConfigText() {
       "WIFI_SSID=\r\n"
       "WIFI_PASS=\r\n"
       "\r\n"
-      "# Rechtstreeks naar Immich (aanbevolen). API-sleutel met alleen de rechten\r\n"
+      "# Immich. API-sleutel met alleen de rechten\r\n"
       "# album.read, asset.read en asset.view. IMMICH_URL bv. https://photos.example.net\r\n"
       "IMMICH_URL=\r\n"
       "IMMICH_API_KEY=\r\n"
       "IMMICH_ALBUM=Fotolijst\r\n"
       "\r\n"
-      "# Of: via de fotolijst-server (alleen gebruikt als IMMICH_URL leeg is)\r\n"
-      "FRAME_URL=\r\n"
-      "\r\n"
-      "# Seconden tussen twee foto's (3600 = elk uur, 86400 = dagelijks).\r\n"
-      "# Bij de server-modus bepaalt de server dit.\r\n"
+      "# Seconden tussen twee foto's (3600 = elk uur, 86400 = dagelijks)\r\n"
       "REFRESH_SECONDS=3600\r\n"
       "\r\n"
       "# landscape = alleen liggende foto's, portrait = alleen staande (gedraaid,\r\n"
