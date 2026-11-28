@@ -41,6 +41,27 @@ and HTTPS takes ~20 s. Certificates are verified with the built-in CA bundle.
 | ESP32-S3 dev board, **N16R8** | 16 MB flash, 8 MB octal PSRAM; e.g. an ESP32-S3-DevKitC-1 clone with two USB-C ports |
 | Waveshare 5.65inch e-Paper Module (F) | 600×448, black/white/green/blue/red/yellow/orange |
 
+### Dimensions
+
+Official drawings from Waveshare:
+
+- [Module outline](https://www.waveshare.com/img/devkit/LCD/5.65inch-e-Paper-Module-F/5.65inch-e-Paper-Module-F-details-size.jpg)
+  (PCB with panel, mounting holes, pin header)
+- [Panel specification (PDF)](https://files.waveshare.com/upload/7/7a/5.65inch_e-Paper_%28F%29_Sepecification.pdf),
+  page 5: mechanical drawing of the bare panel, including the FPC
+- [Product page](https://www.waveshare.com/5.65inch-e-paper-module-f.htm) and
+  [wiki](https://www.waveshare.com/wiki/5.65inch_e-Paper_Module_(F)_Manual)
+
+| | mm |
+|---|---|
+| Module (PCB) | 138.5 × 100.5 |
+| Mounting holes | 4, centres 2.5 from the PCB edges (so 133.5 × 95.5 apart) |
+| Pin header | 8 pins, 2.54 pitch, 3.0 from the edge, centred on the short side |
+| Panel glass | 125.4 × 99.5 × 0.91 |
+| Active area | 114.9 × 85.8 (600 × 448 px, 0.1915 pitch) |
+
+No 3D/STEP model is published.
+
 ### Wiring
 
 | Display | ESP32-S3 |
